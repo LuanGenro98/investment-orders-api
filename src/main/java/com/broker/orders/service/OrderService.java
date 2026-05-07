@@ -4,6 +4,9 @@ import com.broker.orders.aop.Idempotent;
 import com.broker.orders.domain.InvestmentOrder;
 import com.broker.orders.repository.OrderRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 /**
  * @Service é um "Stereotype Annotation" (assim como @Component, @Repository, @Controller).
@@ -21,6 +24,8 @@ public class OrderService {
      */
     private final OrderRepository orderRepository;
 
+    private final AccountService accountService;
+
     /**
      * CONCEITO EXAME: Injeção de Dependência via Construtor (Constructor Injection).
      * Esta é a forma recomendada pela equipe do Spring.
@@ -31,18 +36,32 @@ public class OrderService {
      * Vantagem cobrada na prova: Permite que a classe seja instanciada em testes unitários puros
      * usando a palavra 'new' passando um Mock, sem precisar subir o contexto do Spring.
      */
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, AccountService accountService) {
         this.orderRepository = orderRepository;
+        this.accountService = accountService;
     }
 
     /**
      * Agora, o Spring vai criar um Proxy em volta de OrderService.
      * Quando alguém chamar placeOrder, na verdade estará chamando o Proxy,
      * que vai executar o nosso IdempotencyAspect primeiro.
+     *
+     * CONCEITO EXAME: @Transactional cria um proxy em volta do método.
+     * Ele inicia uma transação (connection.setAutoCommit(false)) antes do método executar,
+     * e faz o COMMIT se o método terminar com sucesso.
+     *
+     * SE der erro, ele faz o ROLLBACK das operações no banco.
      */
     @Idempotent
-    public InvestmentOrder placeOrder(String ticker, Integer quantity, java.math.BigDecimal price, String idempotencyKey) {
+    @Transactional
+    public InvestmentOrder placeOrder(String accountId, String ticker, Integer quantity, BigDecimal price, String idempotencyKey) {
 
+        BigDecimal totalAmount = price.multiply(new BigDecimal(quantity));
+
+        // Passo 1: Deduz o saldo (pode lançar IllegalArgumentException)
+        accountService.deductBalance(accountId, totalAmount);
+
+        // Passo 2: Salva a ordem
         InvestmentOrder newOrder = new InvestmentOrder(ticker, quantity, price, idempotencyKey);
 
         // O proxy do JpaRepository intercepta o .save() e executa o INSERT
