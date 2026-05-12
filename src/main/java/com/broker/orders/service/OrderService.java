@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 /**
  * @Service é um "Stereotype Annotation" (assim como @Component, @Repository, @Controller).
@@ -66,5 +67,10 @@ public class OrderService {
 
         // O proxy do JpaRepository intercepta o .save() e executa o INSERT
         return orderRepository.save(newOrder);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<InvestmentOrder> getOrder(Long orderId) {
+        return orderRepository.findById(orderId);
     }
 }
