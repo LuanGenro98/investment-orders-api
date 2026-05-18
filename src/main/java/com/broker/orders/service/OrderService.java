@@ -3,6 +3,7 @@ package com.broker.orders.service;
 import com.broker.orders.aop.Idempotent;
 import com.broker.orders.domain.InvestmentOrder;
 import com.broker.orders.repository.OrderRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,9 +53,15 @@ public class OrderService {
      * e faz o COMMIT se o método terminar com sucesso.
      *
      * SE der erro, ele faz o ROLLBACK das operações no banco.
+     * OBJECTIVE 5.3: Method-level Security & OBJECTIVE 1.3.3: SpEL.
+     *
+     * Aqui nós usamos o SpEL (#accountId) para pegar o parâmetro do método,
+     * e 'authentication.name' para pegar o nome de usuário do contexto de segurança atual.
+     * Se eles não baterem, o Spring lança uma AccessDeniedException ANTES do método executar.
      */
     @Idempotent
     @Transactional
+    @PreAuthorize("#accountId == authentication.name or hasRole('ADMIN')")
     public InvestmentOrder placeOrder(String accountId, String ticker, Integer quantity, BigDecimal price, String idempotencyKey) {
 
         BigDecimal totalAmount = price.multiply(new BigDecimal(quantity));
