@@ -69,7 +69,7 @@ The API is exposed under the `/api/v1/orders` prefix. For write/delete operation
 
 **Luan Alves Genro** Software Engineer & IT Specialist focused on designing robust backend architectures. This project reflects the practical application and technical consolidation of the advanced studies that led to achieving the official **VMware Spring Certified Professional** certification.
 
-* **LinkedIn:** [View Professional Profile](https://linkedin.com/in/your-profile-here)
-* **VMware Credential:** [View Official Certification Badge](https://your-credly-badge-link-here)
+* **LinkedIn:** [View Professional Profile](https://www.linkedin.com/in/luan-alves-genro-821aa5182/)
+* **VMware Credential:** [View Official Certification Badge](https://www.credly.com/badges/075c864c-195e-4332-b613-6fba4fb8b001/public_url)
 
 > *"Building software is not just about making the code compile; it's about deeply understanding the engine that makes it run."*
